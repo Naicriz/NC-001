@@ -1,8 +1,11 @@
-#Pydantic
+#Python3
+from datetime import date
+#Typing
 from typing import Optional
-from core.schemas.schemas import Client
+#Pydantic
+from core.schemas.schemas import Client, Adress
 #Fastapi
-from fastapi import FastAPI, Body, Path, Query
+from fastapi import FastAPI, Body, Query, Path
 
 
 app = FastAPI() # instancia de fastapi
@@ -14,19 +17,61 @@ app = FastAPI() # instancia de fastapi
 def home(): #path operations function
     return {"mensaje": "Este es un mensaje jiejiejie!"}
 
-# Request and Response Body
+##REQUEST AND RESPONSE BODY - TEST EJEMPLO
 
-@app.post("/client/new", response_model=Client) # endpoint para crear un nuevo cliente 
-#def create_userclient(client: Client = Body(...)):
+#@app.post("/client/new")
+@app.post("/client/new", response_model=Client)  
+#def create_userclient(client: Client = Body(...)): # endpoint para crear un nuevo cliente
 def create_userclient(client: Client):
     return client
 
-# Validaciones: Query parameters
+
+# Validaciones: Query parameters - TEST EJEMPLO
 
 @app.get("/client/detail")
 def show_userclient(
-    name: Optional[str] = Query(None, min_length=3, max_length=18), # Parametro opcional
-    last_name: Optional[str] = Query(None, min_length=4, max_length=36),
-    birthday: str = Query(None),
+    name: str = Query(None,
+    min_length=3,
+    max_length=18,
+    title="Client Name",
+    description="This is the name of the client. Required parameter(or will be).",
+    ), 
+    last_name: str = Query(None,
+    min_length=4, 
+    max_length=36,
+    title="Client Last Name",
+    description="This is the last name of the client. Required parameter(or will be)..",
+    ), # Parametro opcional
+    birthday: date = Query(...), #Se recomienda Path Parameters para elementos obligatorios
+    genre: Optional[str] = Query(None) # Parametro opcional
 ):
     return {"name": name, "last_name": last_name, "birthday": birthday}
+
+
+# Vaidaciones: Path parameters - TEST EJEMPLO
+
+@app.get("/client/detail/{client_id}")
+def show_userclient(
+    client_id: int = Path(..., gt=0) # Parametro obligatorio, y que sea mayor a 0
+):
+    return { client_id: "Existe!"}
+
+# Validation: Request Body - TEST EJEMPLO
+
+@app.put("cliente/{client_id}") #se envia un json, luego lo trabaja en formato diccionario de python yluego se transforma y envie en son again.
+def update_userclient(
+    client_id: int = Path(
+        ...,
+        title="Client ID",
+        description="This is the ID of the client. Required parameter(or will be).",
+        gt=0
+    ),
+    client: Client = Body(...),
+    adress: Adress = Body(...) 
+):
+#    results = client.dict() # se convierte a diccionario
+#    results.update(adress.dict()) 
+    results = client.dict() & adress.dict()
+    return results
+
+    # Validation: Models - Estan directamente relacionados con los request body - TEST EJEMPLO

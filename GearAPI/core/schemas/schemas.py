@@ -19,4 +19,9 @@ class Client(BaseModel):
     genre: Optional[str] = None
     email: str
     phone: str
-    adress: str
+
+class Adress(BaseModel):
+    street: str
+    number: int
+    city: str
+    country: str
