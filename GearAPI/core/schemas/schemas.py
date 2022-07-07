@@ -7,10 +7,10 @@ endpoint's expected request body".
 """
 #Python
 from datetime import date
+#Typing
 from typing import Optional
 #Pydantic
 from pydantic import BaseModel
-
 
 class Client(BaseModel):
     name: str
