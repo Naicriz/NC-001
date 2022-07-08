@@ -34,13 +34,13 @@ def show_userclient(
     min_length=3,
     max_length=18,
     title="Client Name",
-    description="This is the name of the client. Required parameter(or will be).",
-    ), 
+    description="This is the name of the client.",
+    ),
     last_name: str = Query(None,
     min_length=4, 
     max_length=36,
     title="Client Last Name",
-    description="This is the last name of the client. Required parameter(or will be)..",
+    description="This is the last name of the client.",
     ), # Parametro opcional
     birthday: date = Query(...), #Se recomienda Path Parameters para elementos obligatorios
     genre: Optional[str] = Query(None) # Parametro opcional
@@ -51,19 +51,19 @@ def show_userclient(
 # Vaidaciones: Path parameters - TEST EJEMPLO
 
 @app.get("/client/detail/{client_id}")
-def show_userclient(
+def show_userclient_id(
     client_id: int = Path(..., gt=0) # Parametro obligatorio, y que sea mayor a 0
 ):
     return { client_id: "Existe!"}
 
-# Validation: Request Body - TEST EJEMPLO
+# Validación: Request Body - TEST EJEMPLO
 
 @app.put("cliente/{client_id}") #se envia un json, luego lo trabaja en formato diccionario de python yluego se transforma y envie en son again.
 def update_userclient(
     client_id: int = Path(
         ...,
         title="Client ID",
-        description="This is the ID of the client. Required parameter(or will be).",
+        description="This is the ID of the client. that you want to update.",
         gt=0
     ),
     client: Client = Body(...),
@@ -71,7 +71,9 @@ def update_userclient(
 ):
 #    results = client.dict() # se convierte a diccionario
 #    results.update(adress.dict()) 
-    results = client.dict() & adress.dict()
+    #results = client.dict() & adress.dict() #se combinan los 2 diccionarios
+    results = dict(client).update(adress) #se combinan los 2 diccionarios
+    #results = dict(client.dict(), **adress.dict()) #se combinan los 2 diccionarios
     return results
 
     # Validation: Models - Estan directamente relacionados con los request body - TEST EJEMPLO
