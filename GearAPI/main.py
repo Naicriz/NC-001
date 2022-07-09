@@ -2,33 +2,37 @@
 from datetime import date
 #Typing
 from typing import Optional
+
+from pydantic import Field
 #Pydantic
 from core.schemas.schemas import Client, Adress
 #Fastapi
 from fastapi import FastAPI, Body, Query, Path
 
 
-app = FastAPI() # instancia de fastapi
+app = FastAPI() # Instancia de FastAPI
 
 
-# Path operations # path parameters /hola/{hola_id}
+# Path operations # Path parameters /hola/{hola_id}
 
-@app.get("/") #path operations decorator - permite acceder a un path ejecutando la def
-def home(): #path operations function
+@app.get("/") #Path operations; decorator # Permite acceder a un path ejecutando la def
+def home(): #Path operations; function
     return {"mensaje": "Este es un mensaje jiejiejie!"}
 
-##REQUEST AND RESPONSE BODY - TEST EJEMPLO
+### REQUEST AND RESPONSE BODY EJEMPLOs ###
 
-#@app.post("/client/new")
-@app.post("/client/new", response_model=Client)  
-#def create_userclient(client: Client = Body(...)): # endpoint para crear un nuevo cliente
+#@app.post("/client/new") # ALT 1.0 (Otra forma de definir el path) 
+#def create_userclient(client: Client = Body(...)): # ALT 1.1 (Otra forma de crear la funcion)
+
+@app.post("/user/new", response_model=Client)
+# Endpoint para crear un nuevo cliente
 def create_userclient(client: Client):
     return client
 
 
 # Validaciones: Query parameters - TEST EJEMPLO
 
-@app.get("/client/detail")
+@app.get("/user/detail")
 def show_userclient(
     name: str = Query(None,
     min_length=3,
@@ -42,15 +46,15 @@ def show_userclient(
     title="Client Last Name",
     description="This is the last name of the client.",
     ), # Parametro opcional
-    birthday: date = Query(...), #Se recomienda Path Parameters para elementos obligatorios
-    genre: Optional[str] = Query(None) # Parametro opcional
+    birthday: Optional[str] = Path(...),#Se recomienda Path Parameters para elementos obligatorios
+    gender: Optional[str] = Query(None) # type: ignore
 ):
-    return {"name": name, "last_name": last_name, "birthday": birthday}
+    return {"name": name, "last_name": last_name, "birthday": birthday, "gender": gender}
 
 
-# Vaidaciones: Path parameters - TEST EJEMPLO
+# Validaciones: Path parameters - TEST EJEMPLO
 
-@app.get("/client/detail/{client_id}")
+@app.get("/user/{client_id}")
 def show_userclient_id(
     client_id: int = Path(..., gt=0) # Parametro obligatorio, y que sea mayor a 0
 ):
@@ -58,22 +62,24 @@ def show_userclient_id(
 
 # Validación: Request Body - TEST EJEMPLO
 
-@app.put("cliente/{client_id}") #se envia un json, luego lo trabaja en formato diccionario de python yluego se transforma y envie en son again.
+@app.put("user/update/{client_id}") #se envia un json, luego lo trabaja en formato diccionario de python yluego se transforma y envie en son again.
 def update_userclient(
     client_id: int = Path(
         ...,
         title="Client ID",
-        description="This is the ID of the client. that you want to update.",
+        description="This is the ID of the client that you want to update.",
         gt=0
     ),
-    client: Client = Body(...),
-    adress: Adress = Body(...) 
+    client: Client = Body(...)
+    #adress: Adress = Body(...) 
 ):
-#    results = client.dict() # se convierte a diccionario
-#    results.update(adress.dict()) 
-    #results = client.dict() & adress.dict() #se combinan los 2 diccionarios
-    results = dict(client).update(adress) #se combinan los 2 diccionarios
-    #results = dict(client.dict(), **adress.dict()) #se combinan los 2 diccionarios
+### Formas en las que se pueden combinar diccionarios en python ###
+    #results = client.dict() # se convierte a diccionario
+    #results.update(adress.dict()) # se agrega el diccionario de adress
+    #results = client.dict() and adress.dict()
+    #results = dict(client.dict(), **adress.dict())
+
+    results = dict(client)#.update(adress)
     return results
 
-    # Validation: Models - Estan directamente relacionados con los request body - TEST EJEMPLO
+# Validación: Models - Estan directamente relacionados con los request body - TEST EJEMPLO
